@@ -124,8 +124,6 @@
 
 - golang 协程是如何实现的
 
-  - <img src="/Users/yongquan/Downloads/j37FX8nek9.png!large.png"/>
-
   - goroutine是一个轻量级的线程--协程
 
   - 在创建一个goroutine的时候，调用`runtime`包中的`newproc()`方法
@@ -387,7 +385,7 @@
 
     - P的状态转移图
 
-      - ![](/Users/yongquan/Downloads/16f55032b0d77e4c.png)
+      - ![p_status](./pic/p_status.png)
 
     - ```go
       type p struct {
@@ -520,6 +518,8 @@
       ```
 
   - G(Goroutine) 一个个的Goroutine，需要在M上面才能真正的执行
+
+    - ![g_model](./pic/g_model.png)
 
     - 对G而言，P就是他的CPU
 
@@ -854,7 +854,7 @@
       fmt.Println(any)
       ```
 
-    - ![image-20200902231202413](/Users/yongquan/Library/Application Support/typora-user-images/image-20200902231202413.png)
+    - ![eface_exp](./pic/eface_exp.png)
 
   - iface的具体结构
 
@@ -895,7 +895,7 @@
 
     - iface的整体结构为
 
-      - ![image-20200902233207636](/Users/yongquan/Library/Application Support/typora-user-images/image-20200902233207636.png)
+      - ![iface](./pic/iface.png)
 
       - 假设讲一个方法类型转换为另一个方法类型
 
@@ -914,7 +914,7 @@
           fmt.Println(any)
           ```
 
-        - ![image-20200902233611949](/Users/yongquan/Library/Application Support/typora-user-images/image-20200902233611949.png)
+        - ![image-20200902233611949](./pic/iface_exp.png)
 
     - go通过`convT2E`与`convT2I`将编译器一直的类型赋值给接口
 
@@ -928,7 +928,7 @@
 
   - 同时该**G会被抽象成含有G指针和send元素的`sudog`结构体**保存在**hchan结构中的`sendq`中**
 
-  - ![image-20200904104336221](/Users/yongquan/Library/Application Support/typora-user-images/image-20200904104336221.png)
+  - ![channel_exp](./pic/channel_exp.png)
 
   - 当有另一个G(称之为G2)来**接受数据**时，channel**会将`sendq`中的中的G推出**，将G中send 的数据**推到缓存中**，然后调用Go的scheduler唤醒G，并把**G放到可运行的Goroutine队列中**。
 
@@ -1668,7 +1668,7 @@
     - 线性内存
 
       - 共分为三段`span`,`bitmap`, `arena`分别预留了512MB，16GB，512GB的内存空间，这些空间不是真正的物理内存，而是虚拟内存。
-      - ![](/Users/yongquan/Library/Mobile Documents/com~apple~CloudDocs/笔记/图片/2020-02-29-15829868066463-heap-before-go-1-11.png)
+      - ![](./pic/heap_before_go_1_11.png)
       - `spans`
         - **存储**了指向**内存管理单元`mspan`的指针**，每个**内存单元会管理几页的内存空间**，每页大小为8KB
       - `bitmap`
@@ -1682,7 +1682,7 @@
 
       - 使用稀疏的内存布局，不仅能移除堆大小的上线，还能解决C和go混合使用时的地址空间冲突问题。
 
-      - ![](/Users/yongquan/Library/Mobile Documents/com~apple~CloudDocs/笔记/图片/2020-02-29-15829868066468-heap-after-go-1-11.png)
+      - ![](./pic/heap_after_go_1_11.png)
 
       - 运行时使用二维的`runtime.heapArena`数组管理所有的内存，**每个单元都会管理64MG的内存空间**
 
@@ -1726,7 +1726,7 @@
   - 内存管理组建
 
     - Go 语言的内存分配器包含内存管理单元、线程缓存、中心缓存和页堆几个重要组件
-    - ![](/Users/yongquan/Library/Mobile Documents/com~apple~CloudDocs/笔记/图片/2020-02-29-15829868066479-go-memory-layout.png)
+    - ![](./pic/go_memory_layout.png)
 
   - 对于三种对象采用不同的分配策略
 
@@ -2012,7 +2012,7 @@
   
       - 桶的数据结构就是bmap
 
-        - ![](/Users/yongquan/Library/Mobile Documents/com~apple~CloudDocs/笔记/图片/2019-12-30-15777168478811-hmap-and-buckets.png)
+        - ![](./pic/hmap-and-buckets.png)
 
         - 每个`bmap`会存储8个建制对，当哈希表中的存储的数据过多，单个桶无法装满时，会使用`extra.overflow`中桶溢出数据。由于溢出桶能够减少扩容的次数，所以一直保留至今。
   

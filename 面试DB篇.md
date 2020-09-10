@@ -337,6 +337,9 @@ categories: [学习，Mysql]
       1) "redis"
         2) "rabitmq"
     3) "mongodb"
+      
+        ```
+      
         ```
     - 哈希表实现，元素不重复
       
@@ -345,8 +348,11 @@ categories: [学习，Mysql]
       - 为集合提供了交集，并集，差集等操作
       
       - 使用场景：共同好友，利用唯一性统计访问网站的所有独立ip
+        
+      ```
+        
         ```
-  
+      
     - 有序集合
   
       - ```
@@ -357,13 +363,13 @@ categories: [学习，Mysql]
         zadd runoob 0 rabitmq
       (integer) 1
         zadd runoob 0 rabitmq
-      (integer) 0
+    (integer) 0
         ZRANGEBYSCORE runoob 0 1000
       1) "mongodb"
         2) "rabitmq"
       3) "redis"
         ```
-
+  
         
   
       - 将Set中的元素增加一个权重参数score，元素按score排序
@@ -387,9 +393,9 @@ categories: [学习，Mysql]
     - 单机而言，很难达到较高的qbs
     - redis实现高并发主要是依靠主从架构，一主多从，**单主用来写入数据**，单机几万QPS，**多从用来查询数据**，多个实例可以提供每秒10w的QPS
   - 如果需要实现高并发的同时，容纳大量的数据，那么就需要redis集群
-    
+  
 - 如果做主从架构部署，那么加上哨兵监控，如果一个实例当即，可以进行主备切换
-    
+  
   - 做缓存如何设计
   
     - Redis缓存原理
@@ -427,13 +433,13 @@ categories: [学习，Mysql]
 - rehash过程
   
     - Redis中，键值对存储方式是由字典(Dict)保存的，而字典底层是通过哈希表来实现的
-  
+    
     - 在redis的具体实现中，使用了一种叫做**渐进式哈希**的机制来提高字典的缩放效率，避免rehash对服务器性能所造成的影响。渐进式哈希采用了**分而治之**的方式，将**reahsh键值对**所需的计算时间**均摊**到字典的**每个添加，删除，查找和更新操作**上，从而避免了集中时哈希带来的庞大计算量。
-  
+    
     - 在Redis当中存在太多数据，并且需要扩容是，如果想Java一样的HashMap一次性扩容的话，对单线程的Redis的性能是毁灭性的打击，所以就有了渐进式哈希的方法。
-  
+    
     - Redis中字典的定义：
-  
+    
       - ```c
         /* 哈希表节点 */
         typedef struct dictEntry {
@@ -481,9 +487,9 @@ categories: [学习，Mysql]
             int iterators; /* number of iterators currently running */
         } dict;
         ```
-  
+    
       - 由结构定义我们可以看出，对于每一个字典，其维护了一个dictht的数组，其中包含了**两个哈希表**的，平时只使用ht[0],当ht[0]的容量需要扩容是，这时候就需要将内容迁到ht[1]当中，而如果一次性将所有的数据拷贝过来，这对于单线程模型的redis的性能是毁灭性的打击。所以需要在每次的插入，删除，更新的时候，执行`dictRehash()`方法，最小化数据迁移的代价。
-  
+    
       - ```c
         /* Performs N steps of incremental rehashing. Returns 1 if there are still
          * keys to move from the old to the new hash table, otherwise 0 is returned.
@@ -539,7 +545,7 @@ categories: [学习，Mysql]
             return 1;
         }
         ```
-  
+    
         
 
 ---
@@ -578,7 +584,7 @@ categories: [学习，Mysql]
       - 对于任意节点而言，其到叶子结点NIL指针的每条路径都**包含相同数目的黑节点**
       - **每一条路径都包含相同数目的黑节点**
 
-      - ![image-20200822115033004](/Users/yongquan/Library/Application Support/typora-user-images/image-20200822115033004.png)
+      - ![red_black_tree](./pic/red_black_tree.png)
 
     - 应用
 
@@ -601,7 +607,7 @@ categories: [学习，Mysql]
       - 非叶子结点中的关键字： K[1], K[2], ... , K[M-1]; 且K[i] < K[i - 1]
       - 非叶子结点的指针：P[1], P[2], ..., P[M]， 其中P[1]指向关键字小于K[1] 的子树， P[M]指向关键字大雨K[M-1]的子树，其中P[i] 指向关键字属于(K[i-1], K[i])的子树
       - 所有的叶子结点在同一层
-      - ![image-20200822121647309](/Users/yongquan/Library/Application Support/typora-user-images/image-20200822121647309.png)
+      - ![b_tree](./pic/b_tree.png)
       - 上图所示35结点，35代表一个key，而小黑块表示这个key所指向的内容在内存中实际存储的位置，是一个指针
     - B+树
       - 应文件系统产生的一种B树的变形(文件的目录一级一级索引，只有最底层的叶子结点(文件)保存数据)， 而**非叶子结点只保存索引**，**不保存实际的数据**，数据**都保存在叶子结点**当中。
@@ -611,7 +617,7 @@ categories: [学习，Mysql]
         - 为所有的叶子结点增加一个链指针
         - 所有关键字都是在叶子结点出现的，且链表的关键字恰好是有序的
         - 非叶子结点的相当于是叶子结点的索引(稀疏索引)，叶子结点相当于存储数据的数据层
-        - ![image-20200822130945464](/Users/yongquan/Library/Application Support/typora-user-images/image-20200822130945464.png)
+        - ![image-20200822130945464](./pic/b_plus_tree.png)
     - B/B+树性能分析
       - n个结点的平衡二叉树高度为H(即logn)，而n个节点的B/B+树的高度为logt((n + 1) / 2) + 1
       - 若要作为内存中的查找表，B树不一定比平衡二叉树好，尤其是当m较大时更是如此。
