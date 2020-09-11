@@ -367,27 +367,43 @@ categories: [学习，Mysql]
         
       ```
       
-    - 有序集合(todo:底层实现)
+    - 有序集合
 
-      - ```
+      - 底层实现(ziplist || skiplist)
+      
+      - ziplist(压缩链表)
+      
+        - ![ziplist](./pic/ziplist.png)
+        - `zlbytes` 整个ziplist占用的字节数
+        - `zltail`ziplist表尾节点的偏移量
+        - `zllen`ziplist中节点的数量
+      - 包含多个节点(entry)，每个节点保存一个长度受限的字符数组(不以\0结束)，或者整数。
+        - 每个集合的元素是用两个紧挨在一起的压缩列表节点来保存，第一个节点保存元素的成员，第二个节点保存元素的分值。压缩列表内的集合元素按分值从小到大的顺序进行排列，小的放置在靠近表头的位置。
+        - 当保存的元素少于128个并且保存的所有元素大小都小于64字节
+          - 节点的构成
+        - ![ziplist_node](./pic/ziplist_node.png)
+          - `encoding` && `length`决定了content的类型
+        - `content`保存着节点的内容。
+        
+    - ```
         zadd runoob 0 redis
-        (integer) 1
+      (integer) 1
         zadd runoob 0 mongodb
         (integer) 1
         zadd runoob 0 rabitmq
-      (integer) 1
+        (integer) 1
         zadd runoob 0 rabitmq
-    (integer) 0
+        (integer) 0
         ZRANGEBYSCORE runoob 0 1000
-      1) "mongodb"
+        1) "mongodb"
         2) "rabitmq"
-      3) "redis"
+        3) "redis"
         ```
-
+      
         
-
+      
       - 将Set中的元素增加一个权重参数score，元素按score排序
-
+      
       - 适用于排行榜
 
   - 如何保证高可用（基于哨兵的高可用性）
