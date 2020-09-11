@@ -244,7 +244,7 @@ categories: [学习，Mysql]
 
 ---
 
-- **Redis(Remote Dictionary Server)**
+- **Redis(Remote Dictionary Server)** (todo 底层数据结构)
 
   - 定义：
     
@@ -351,9 +351,9 @@ categories: [学习，Mysql]
         
       ```
         
-        ```
+      ```
       
-    - 有序集合
+    - 有序集合(todo:底层实现)
   
       - ```
         zadd runoob 0 redis
