@@ -384,7 +384,7 @@ categories: [学习，Mysql]
         - ![ziplist_node](./pic/ziplist_node.png)
           - `encoding` && `length`决定了content的类型
         - `content`保存着节点的内容。
-        
+      
     - ```
         zadd runoob 0 redis
       (integer) 1
@@ -398,7 +398,7 @@ categories: [学习，Mysql]
         1) "mongodb"
         2) "rabitmq"
         3) "redis"
-        ```
+      ```
       
         
       
