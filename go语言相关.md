@@ -107,7 +107,7 @@
 
   - 无缓冲
     - 发送与接收需要成对出现
-    - 如果没有chnnel没有接受者，则向chnnel继续写入将会阻塞
+    - 如果没有channel没有接受者，则向channel继续写入将会阻塞
   - 缓冲
     - 内部维护了一个缓冲区(队列)，即使channel中已经有了数据，只要没有超过缓冲区的大小，写入channel不会阻塞。
 
@@ -1795,11 +1795,18 @@
 
 - go的**select 多个通道同时可读**，会怎么处理
 
-  - 先处理最先发生的channel
+  - 随即响应
 
 - 重复关闭通道会异常吗？
 
   - of course
+
+- **从已经关闭的channel中进行读写**
+
+  - 写 出错
+  - 读
+    - 若有缓存，则返回缓存中的值，并且返回true
+    - 无缓存， 返回零值，并且返回false
 
 - context的作用
 
@@ -2259,4 +2266,31 @@
     | 容量      | 0                  | 0                      |
     | 和nil比较 | true               | false                  |
 
+  
+  
+
+
+
+
+
+- **for range**
+
+  - ```go
+    newArr := []*int{}
+    nums := []int {1, 2, 3, 4}
+    for _, v := range nums {
+      newArr = append(newArr, &v)   //如果想要复制1234， 正确的做法应该是 &nums[i]
+    }
     
+    for _, v := range newArr {
+      fmt.Println(*v)  // 4 4 4 4
+    }
+    ```
+
+  - 实际上是用同一个变量v来获取nums的值
+
+---
+
+- 只要是类型转换，就会出现内存拷贝	
+
+  
