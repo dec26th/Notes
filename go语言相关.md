@@ -2043,7 +2043,7 @@
           - ```go
         type bmap struct {
                 topbits  [8]uint8
-            keys     [8]keytype
+            		keys     [8]keytype
                 values   [8]valuetype
                 pad      uintptr
                 overflow uintptr
