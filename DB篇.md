@@ -873,3 +873,10 @@ categories: [学习，Mysql]
   - UPDATE
     - InnoDB执行UPDATE，实际上是新插入一行记录，保存创建时间为当前事物的ID，同时保存当前事物ID到要UPDATE的行的删除时间。
 
+---
+
+- **MySql的复制原理以及流程**
+  - 主:	binlog线程  记录下所有改变了数据库数据的语句，放进master上的binlog中
+  - 从:	io线程 在使用start slave之后，负责从master上拉取binlog内容，放进自己的relay log中
+  - 从： sql执行线程，执行relay log
+
