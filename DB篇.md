@@ -347,9 +347,9 @@ categories: [学习，Mysql]
         
         ```
 
-      1) "redis"
-        2) "rabitmq"
-    3) "mongodb"
+       1) "redis"
+       2) "rabitmq"
+     3) "mongodb"
       
     - 哈希表实现，元素不重复
       
