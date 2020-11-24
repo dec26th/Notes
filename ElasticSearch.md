@@ -1,3 +1,5 @@
+[TOC]
+
 # Elastic Search学习
 
 ## RDS && ES
@@ -74,3 +76,18 @@
 }
 ```
 
+
+
+## 创建索引
+
+```json
+PUT /{index_name}
+{
+  "settings": {}, // es settings
+  "mappings": {
+    "field_one": {"type": ""},
+    "field_two": {"type": ""},
+    ...
+  }
+}
+```
