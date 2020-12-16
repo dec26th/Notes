@@ -2,6 +2,8 @@
 
 ## 命令
 
+`go test -bench =. -benmem -benchmem`   
+
 - -bench 表示测试的函数
 - -benchmem 显示测试函数的内存分配大小，内存分配次数的统计
 - -count 次数
