@@ -1,6 +1,20 @@
 # Go Assmably
 
-## 特殊标识符
+## Command to gen Go Asm Code
+
+ `go tool compile -S xxx.go`   show the assmably of xxx.go in terminal
+
+
+
+```shell
+go tool compile -N -l once.go    // generate the assmably file
+go tool objdump once.o           // show the assmably file
+go tool objdump -S Do once.o     // show the function Do in the assmably file
+```
+
+
+
+## Symbols
 
 - SP：Stack Pointer -> refer to **frame-local variables** and the **arguments** being prepared **for function calls**
   - 
