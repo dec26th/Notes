@@ -478,7 +478,22 @@ x = "error"; //error!
         }
         ```
 
-    
+    -  ```rust
+        fn main() {
+            fn plus_one(x: Option<i32>) -> Option<i32> {
+                match x {
+                    None => None,
+                    Some(i) => Some(i + 1),
+                }
+            }
+        
+            let five = Some(5);
+            let six = plus_one(five);
+            let none = plus_one(None);
+        }
+        ```
+
+        
 
 ### 4.2 The match Control Flow Opertor
 
@@ -527,3 +542,832 @@ x = "error"; //error!
 ### 	5.2 Packages
 
 ### 	5.3 Modules
+
+## 6 Common Collections
+
+### 6.1 Storing Lists of Values with Vectors
+
+   -    **Creating a New Empty Vector**
+
+           -    ```rust
+                let v: Vec<i32> = Vec::new();
+                ```
+
+-  **Creating a New Vector Containing values**
+
+    -  ```rust
+        let v = vec![1, 2, 3];
+        ```
+
+-  **Updating a Vector**
+
+    -  ```rust
+        let mut v = Vec::new();
+        
+        v.push(5);
+        v.push(6);
+        v.push(7);
+        v.push(8);
+        ```
+
+-  **Get Ele in Vector**
+
+    -  ```rust
+        fn main() {
+            let v = vec![1, 2, 3, 4, 5];
+        
+            let third: &i32 = &v[2]; // return the references 
+            println!("The third element is {}", third);
+        
+            match v.get(2) {  // return the Options<&T>
+                Some(third) => println!("The third element is {}", third),
+                None => println!("There is no third element."),
+            }
+        }
+        ```
+
+-  **Can not Put Ele in Vector When holding a reference on Vector**
+
+    -  ```rust
+        fn main() {
+            let mut v = vec![1, 2, 3, 4, 5];
+        
+            let first = &v[0];
+        
+            v.push(6);
+        
+            println!("The first element is: {}", first);
+        }
+        ```
+
+    -  Because add one more ele in Vector may lead to reallocating the space, `first` may then be pointed to deallocated memory.
+
+-  **Iterating over the Values in a Vector**
+
+    -  ```rust
+        fn main() {
+            let v = vec![100, 32, 57];
+            for i in &v {
+                println!("{}", i);
+            }
+        }
+        ```
+
+-  **Using an Enum to Store Multiple Types**
+
+    -  ```rust
+        fn main() {
+            enum SpreadsheetCell {
+                Int(i32),
+                Float(f64),
+                Text(String),
+            }
+        
+            let row = vec![
+                SpreadsheetCell::Int(3),
+                SpreadsheetCell::Text(String::from("blue")),
+                SpreadsheetCell::Float(10.12),
+            ];
+        }
+        ```
+
+    
+
+### 6.2 Storing UTF-8 Encoded Text with Strings
+
+ -    **Creating a New String**
+
+       -    ```rust
+            let mut s = String::new();
+            
+            let data = "hello";
+            let s = data.to_string(); // get the String type from string
+            
+            let s = String::from("hello");
+            ```
+
+- 	**Updateing a String**
+
+    - 	```rust
+        fn main() {
+            let mut s1 = String::from("foo");
+            let s2 = "bar";
+            s1.push_str(s2);
+            println!("s2 is {}", s2);
+          
+          
+          	s1.put(';'); // the method put can only add a single character.
+        }
+        ```
+
+- 	**Concatenation with the + Operation of the `format!` Marco**
+
+    - 	```rust
+        fn main() {
+            let s1 = String::from("Hello, ");
+            let s2 = String::from("world!");
+            let s3 = s1 + &s2; // note s1 has been moved here and can no longer be used
+        }
+        ```
+
+    - 	`+` opertor use the `add`method like
+
+        - 	```rust
+            fn add(self, s: &str) -> String {}
+            ```
+
+    - 	Rust coerce the &String(in this case, &s2) into &str(in this case, &s2[..])
+
+    - 	```rust
+        fn main() {
+            let s1 = String::from("tic");
+            let s2 = String::from("tac");
+            let s3 = String::from("toe");
+        
+            let s = format!("{}-{}-{}", s1, s2, s3);  // will not take any ownership of any of its parameters.
+        }
+        ```
+
+- 	**Indexing into Strings**
+
+    - 	Rust strings don't support indexing.
+
+        - 	```rust
+            let s = String::from("hellp");
+            let h = s[0]; // error
+            ```
+
+    - 	Why?
+
+        - 	`String` is a wrapper over a `Vec<u8>`.
+        - 	it's hard for rust to determine the return type: 1. Byte value? 2, character, 3. a grapheme cluster 4 string slice.
+
+    - 	You should be specific in the indexing and indicate that what you want
+
+        - 	```rust
+            let hello = String::from("hello");
+            let a = &hello[0..1];
+            ```
+
+- 	**Methods for Iterating Over Strings**
+
+    - 	```rust
+        for c in "你好".chars() {
+        	println!({}, c);
+        }
+        ```
+
+### 6.3 Storing Keys With Associated Values in HashMaps
+
+ -    **Creating a New Hash Map**
+
+       -    ```rust
+            fn main() {
+                use std::collections::HashMap;
+            
+                let mut scores = HashMap::new();
+            
+                scores.insert(String::from("Blue"), 10);
+                scores.insert(String::from("Yellow"), 50);
+            }
+            ```
+
+- **Access Values in a Hash Map**
+
+    - ```rust
+        fn main() {
+            use std::collections::HashMap;
+        
+            let mut scores = HashMap::new();
+        
+            scores.insert(String::from("Blue"), 10);
+            scores.insert(String::from("Yellow"), 50);
+        
+            let team_name = String::from("Blue");
+            let score = scores.get(&team_name);
+        }
+        ```
+
+    - `get` return an `Option<&V>`, if there is no key in the hash map, `get` will return `None`.
+
+    - Iterate over each key/value pair in a hash map.
+
+        - ```rust
+            (fn main() {
+                use std::collections::HashMap;
+            
+                let mut scores = HashMap::new();
+            
+                scores.insert(String::from("Blue"), 10);
+                scores.insert(String::from("Yellow"), 50);
+            
+                for (key, value) in &scores {
+                    println!("{}: {}", key, value);
+                }
+            }
+            ```
+
+    - if the key does not exit, put the default result, else update
+
+        - ```rust
+            fn main() {
+                use std::collections::HashMap;
+            
+                let mut scores = HashMap::new();
+                scores.insert(String::from("Blue"), 10);
+            
+                scores.entry(String::from("Yellow")).or_insert(50);
+                scores.entry(String::from("Blue")).or_insert(50);
+            
+                println!("{:?}", scores);
+            }
+            ```
+
+
+
+## 7 Error Handling
+
+### 7.1 Unrecoverable Errors with `panic!`
+
+### 7.2 Recoverable Errors with Result
+
+-   **Handling Potential Failure with the `Result` Type**
+
+    -   ```rust
+        enum Result<T, E> {
+            Ok(T),
+            Err(E),
+        }
+        ```
+
+-   **Matching on Different Errors**
+
+    -   ```rust
+        use std::fs::File;
+        use std::io::ErrorKind;
+        
+        fn main() {
+            let f = File::open("hello.txt");
+        
+            let f = match f {
+                Ok(file) => file,
+                Err(error) => match error.kind() {
+                    ErrorKind::NotFound => match File::create("hello.txt") {
+                        Ok(fc) => fc,
+                        Err(e) => panic!("Problem creating the file: {:?}", e),
+                    },
+                    other_error => {
+                        panic!("Problem opening the file: {:?}", other_error)
+                    }
+                },
+            };
+        }
+        ```
+
+        
+
+-   **Shortcuts for Panic on Error: `unwrap` and `expect`**
+
+    -   `match` is a little bit verbose
+
+    -   `unwrap`: the function will return the value inside the `Ok`. If the `Result` is the `Err`, `unwrap` will call the `panic!`
+
+        -   ```rust
+            use std::fs::File;
+            
+            fn main() {
+                let f = File::open("hello.txt").unwrap();
+            }
+            ```
+
+    -   `expect`: the same as `unwrap`, but with more readable message.
+
+-   **A Shortcut for Prepagating Errors: the ? Operator**
+
+    -   ```rust
+        
+        #![allow(unused)]
+        fn main() {
+        use std::fs::File;
+        use std::io;
+        use std::io::Read;
+        
+        fn read_username_from_file() -> Result<String, io::Error> {
+            let mut f = File::open("hello.txt")?; // if is Err, return, else continue
+            let mut s = String::new();
+            f.read_to_string(&mut s)?;
+            Ok(s)
+        }
+        }
+        ```
+
+    -   The `?` placed after a `Result` value is defined to work in almost the same way as the `match` expressions we defined th handle the `Result`. 
+
+        -   If the `Result` is `Ok`, the value inside the `Ok` will get returned from this expression, and the program will continue. 
+        -   if the `value` is an `Err`, the `Err` will be returned from the whole function as if we had used the `return`.
+
+### 7.3 To `panic!` or Not To `panic!`
+
+-   **Guidelines for Error Handling**
+    -   The bad state is not something that’s *expected* to happen occasionally.
+    -   Your code after this point needs to rely on not being in this bad state.
+    -   There’s not a good way to encode this information in the types you use.
+
+
+
+## 8 Generic Types, Traits, and Lifetimes
+
+### 8.1 Generic Data Types
+
+-   **In Function Definitions**
+
+    -   ```rust
+        fn largest<T>(list: &[T]) -> &T {
+            let mut largest = &list[0];
+        
+            for item in list {
+                if item > largest {
+                    largest = item;
+                }
+            }
+        
+            largest
+        }
+        
+        fn main() {
+            let number_list = vec![34, 50, 25, 100, 65];
+        
+            let result = largest(&number_list);
+            println!("The largest number is {}", result);
+        
+            let char_list = vec!['y', 'm', 'a', 'q'];
+        
+            let result = largest(&char_list);
+            println!("The largest char is {}", result);
+        }
+        ```
+
+    -   It can not compile successfully, because the generics need the `trait` to indicate the type is comparable.
+
+-   **In Struct Definitions**
+
+    -   ```rust
+        struct Point<T> {
+            x: T,
+            y: T,
+        }
+        
+        fn main() {
+            let integer = Point { x: 5, y: 10 };
+            let float = Point { x: 1.0, y: 4.0 };
+        }
+        ```
+
+-   **In Enum Definitions **
+
+    -   ```rust
+        enum Option<T> {
+            Some(T),
+            None,
+        }
+        
+        enum Result<T, E> {
+            Ok(T),
+            Err(E),
+        }
+        ```
+
+-   **In Method Definitions**
+
+    -   ```rust
+        struct Point<T> {
+            x: T,
+            y: T,
+        }
+        
+        impl<T> Point<T> {
+            fn x(&self) -> &T {
+                &self.x
+            }
+        }
+        
+        fn main() {
+            let p = Point { x: 5, y: 10 };
+        
+            println!("p.x = {}", p.x());
+        }
+        ```
+
+    -   ```rust
+        struct Point<T, U> {
+            x: T,
+            y: U,
+        }
+        
+        impl<T, U> Point<T, U> {
+            fn mixup<V, W>(self, other: Point<V, W>) -> Point<T, W> {
+                Point {
+                    x: self.x,
+                    y: other.y,
+                }
+            }
+        }
+        
+        fn main() {
+            let p1 = Point { x: 5, y: 10.4 };
+            let p2 = Point { x: "Hello", y: 'c' };
+        
+            let p3 = p1.mixup(p2);
+        
+            println!("p3.x = {}, p3.y = {}", p3.x, p3.y);
+        }
+        ```
+
+        
+
+### 8.2 Traits: Defining Shared Behavior(in an abstract way)(like interface)
+
+-   **Defining a Trait**
+
+    -   ```rust
+        
+        #![allow(unused)]
+        fn main() {
+        pub trait Summary {
+            fn summarize(&self) -> String;
+        }
+        }
+        ```
+
+-   **Implementing a Trait on a Type**
+
+    -   ```rust
+        
+        #![allow(unused)]
+        fn main() {
+        pub trait Summary {
+            fn summarize(&self) -> String;
+        }
+        
+        pub struct NewsArticle {
+            pub headline: String,
+            pub location: String,
+            pub author: String,
+            pub content: String,
+        }
+        
+        impl Summary for NewsArticle { // implement a trait
+            fn summarize(&self) -> String {
+                format!("{}, by {} ({})", self.headline, self.author, self.location)
+            }
+        }
+        
+        pub struct Tweet {
+            pub username: String,
+            pub content: String,
+            pub reply: bool,
+            pub retweet: bool,
+        }
+        
+        impl Summary for Tweet {
+            fn summarize(&self) -> String {
+                format!("{}: {}", self.username, self.content)
+            }
+        }
+        }
+        ```
+
+-   **Default Implementations**
+
+    -   ```rust
+        
+        #![allow(unused)]
+        fn main() {
+        pub trait Summary {
+            fn summarize(&self) -> String {
+                String::from("(Read more...)")
+            }
+        }
+        
+        pub struct NewsArticle {
+            pub headline: String,
+            pub location: String,
+            pub author: String,
+            pub content: String,
+        }
+        
+        impl Summary for NewsArticle {}
+        
+        pub struct Tweet {
+            pub username: String,
+            pub content: String,
+            pub reply: bool,
+            pub retweet: bool,
+        }
+        
+        impl Summary for Tweet {
+            fn summarize(&self) -> String {
+                format!("{}: {}", self.username, self.content)
+            }
+        }
+        }
+        ```
+
+-   **Traits as Parameters**
+
+    -   ```rust
+        pub fn notify(item: &impl Summary) { // need the keyword impl
+            println!("Breaking news! {}", item.summarize());
+        }
+        ```
+
+        
+
+-   **Trait Bound Syntax**
+
+    -   ```rust
+        pub fn notify(item1: &impl Summary, item2: &impl Summary) {
+        
+        pub fn notify<T: Summary>(item1: &T, item2: &T) {
+        ```
+
+-   **Multiple Trait Bounds**
+
+    -   ```rust
+        pub fn notify(item: &(impl Summary + Display)) {
+        
+        pub fn notify<T: Summary + Display>(item: &T) {
+        ```
+
+-   **With Trait Bounds with `where` Clauses** 
+
+    -   ```rust
+        fn some_function<T: Display + Clone, U: Clone + Debug>(t: &T, u: &U) -> i32 {
+        
+        fn some_function<T, U>(t: &T, u: &U) -> i32
+            where T: Display + Clone,
+                  U: Clone + Debug
+        {
+        ```
+
+### 8.3 Validating References with Lifetimes
+
+-   **Preventing Dangling References with Lifetimes**
+
+-   **Generic Lifttimes in Functions**
+
+    -   ```rust
+        fn main() {
+            let string1 = String::from("abcd");
+            let string2 = "xyz";
+        
+            let result = longest(string1.as_str(), string2);
+            println!("The longest string is {}", result);
+        }
+        
+        fn longest(x: &str, y: &str) -> &str { // Rust does not known which are references.
+            if x.len() > y.len() {
+                x
+            } else {
+                y
+            }
+        }
+        
+        ```
+
+-   **Lifetime Annotation Syntax**
+
+    -   ```rust
+        &i32        // a reference
+        &'a i32     // a reference with an explicit lifetime
+        &'a mut i32 // a mutable reference with an explicit lifetime
+        ```
+
+-   **Lifetime Annotations in Function Signatures**
+
+    -   ```rust
+        fn main() {
+            let string1 = String::from("abcd");
+            let string2 = "xyz";
+        
+            let result = longest(string1.as_str(), string2);
+            println!("The longest string is {}", result);
+        }
+        
+        fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+            if x.len() > y.len() {
+                x
+            } else {
+                y
+            }
+        }
+        ```
+
+    -   The constraint indicates all the references in the params and the return values must have the same lifetime.
+
+    -   The returned reference will also be valid for the length of the **smaller** of the lifetimes of `x` or `y`
+
+        -   ```rust
+            fn main() {
+                let string1 = String::from("long string is long");
+                let result;
+                {
+                    let string2 = String::from("xyz");
+                    result = longest(string1.as_str(), string2.as_str());
+                }
+                println!("The longest string is {}", result); // error, because the lifetime of result is equal to string2
+            }
+            
+            fn longest<'a>(x: &'a str, y: &'a str) -> &'a str {
+                if x.len() > y.len() {
+                    x
+                } else {
+                    y
+                }
+            }
+            ```
+
+-   **Lifetime Annotations in Struct Definitions**
+
+    -   ```rust
+        struct ImportantExcerpt<'a> {
+            part: &'a str,
+        }
+        
+        fn main() {
+            let novel = String::from("Call me Ishmael. Some years ago...");
+            let first_sentence = novel.split('.').next().expect("Could not find a '.'");
+            let i = ImportantExcerpt {
+                part: first_sentence,
+            };
+        }
+        ```
+
+-   **Lifetime Elision**
+
+    -   **Compiler uses three rules to figure out what lifetimes references have when there aren't explicit annotations**
+
+        -   Each params that is a references **gets its own lifetime parameter**.
+
+        -   If there is exactly **one input lifetime parameter**, that lifetime is assigned to **all output lifetime parameters**.:`fn foo<'a>(x: &'a i32) -> &'a i32`
+        -   If there are **multiple input lifetime parameters**, but one of them is `&self` or `&mut self` because **this is a method**, the lifetime of `self` is assigned to **all output lifetime parameters**.
+        -    [References](https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html)
+
+-   **Lifetime Annotations in Method Definitions**
+
+    -   Refet to the rule three
+
+-   **The Static Lifetime**
+
+    -   `'static` means that this references can live for the entire duration of the program.
+
+-   **Generic Type Parameters, Trait Bounds, and Lifetimes Together**
+
+    -   ```rust
+        fn main() {
+            let string1 = String::from("abcd");
+            let string2 = "xyz";
+        
+            let result = longest_with_an_announcement(
+                string1.as_str(),
+                string2,
+                "Today is someone's birthday!",
+            );
+            println!("The longest string is {}", result);
+        }
+        
+        use std::fmt::Display;
+        
+        fn longest_with_an_announcement<'a, T>(
+            x: &'a str,
+            y: &'a str,
+            ann: T,
+        ) -> &'a str
+        where
+            T: Display,
+        {
+            println!("Announcement! {}", ann);
+            if x.len() > y.len() {
+                x
+            } else {
+                y
+            }
+        }
+        ```
+
+
+
+## 9 Writing Automated Tests
+
+### 9.1 How to Write Tests
+
+-   **Three Actions performed by test functions**
+
+    -   Set up any needed data or state
+    -   Run the code you want to test
+    -   Assert the results are what you expect
+
+-   **The Anatomy of a Test Function**
+
+    -   Add `#[test]` on the line before `fn`, Run Your tests with the `cargo test` command.
+
+    -   ```rust
+        #[cfg(test)]
+        mod tests {
+            #[test]
+            fn it_works() {
+                assert_eq!(2 + 2, 4);
+            }
+        
+            #[test]
+            fn hello_world() {
+                println!("Hello, world!");
+            }
+        
+            #[test]
+            fn panic_world() {
+                panic!("World!");
+            }
+        }
+        ```
+
+-   **Checking Results with the `assert!` Macro**
+
+    -   ```rust
+        #[derive(Debug)]
+        struct Rectangle {
+            width: u32,
+            height: u32,
+        }
+        
+        impl Rectangle {
+            fn can_hold(&self, other: &Rectangle) -> bool {
+                self.width > other.width && self.height > other.height
+            }
+        }
+        
+        #[cfg(test)]
+        mod tests {
+            use super::*;
+        
+            #[test]
+            fn larger_can_hold_smaller() {
+                let larger = Rectangle {
+                    width: 8,
+                    height: 7,
+                };
+                let smaller = Rectangle {
+                    width: 5,
+                    height: 1,
+                };
+        
+                assert!(larger.can_hold(&smaller));
+            }
+        }
+        
+        fn main() {}
+        ```
+
+-   **Testing Equality with the `aeeert_eq!`and `aeesrt_ne!` Macros** 
+
+-   **Adding Custom Failure Messages**
+
+    -   ```rust
+        assert!(
+                    result.contains("Carol"),
+                    "Greeting did not contain name, value was `{}`",
+                    result
+                );
+        ```
+
+-   **Checking for Panics with `should_panic`**
+
+    -   ```rust
+        #[test]
+        #[should_panic]
+        ```
+
+-   **Using `Result<T, E> `in Tests** 
+
+    -   ```rust
+        #![allow(unused_variables)]
+        fn main() {}
+        
+        #[cfg(test)]
+        mod tests {
+            #[test]
+            fn it_works() -> Result<(), String> {
+                if 2 + 2 == 4 {
+                    Ok(())
+                } else {
+                    Err(String::from("two plus two does not equal four"))
+                }
+            }
+        }
+        ```
+
+        
+
+### 9.2 Controlling How Tests Are Run
+
+### 9.3 Test Organization
