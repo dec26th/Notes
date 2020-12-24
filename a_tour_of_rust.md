@@ -1370,4 +1370,473 @@ x = "error"; //error!
 
 ### 9.2 Controlling How Tests Are Run
 
+ - **Running Tests in Parallel or Consecutively**
+     - Consecutively
+         - `cargo test -- --test-threads=1`
+- **Showing Function Output**
+    - `cargo test -- --show-output`
+- **Running a Subset of Tests by Name**
+    - **Run single test**
+        - `cargo test {function_name}`
+    - **Filtering to Run Multiple Tests**
+        - `cargo test add` run function whose name contains add
+- **Ignoring Some Tests Unless Specifically Requested**
+    - Afert`#[test]` add the tag `#[ignore]`
+
 ### 9.3 Test Organization
+
+ - **The Tests Module and `#[cfg(test)]`**
+    	- The `#[cfg(test)]` annotation on the tests module tells Rust to compile and run the test code only when you run `cargo test `
+
+
+
+## 10 Functional Language Features: Iterators and Closures
+
+### 10.1 Closures: Anonymous Functions that Can Capture Their Environment
+
+ -    **Closures in Rust**
+
+       -    ```rust
+            let expensive_closure = |num| {
+            	println!("calculating slowly...");
+            	thread::sleep(Duration::from_secs(2));
+            	num
+            };
+            ```
+
+      - To define a closure, we start with a pair of vertical pipes `(|)`, inside which we specify the parameters to the closure.
+
+      - ```rust
+          use std::thread;
+          use std::time::Duration;
+          
+          fn generate_workout(intensity: u32, random_number: u32) {
+              let expensive_closure = |num| {
+                  println!("calculating slowly...");
+                  thread::sleep(Duration::from_secs(2));
+                  num
+              };
+          
+              if intensity < 25 {
+                  println!("Today, do {} pushups!", expensive_closure(intensity));
+                  println!("Next, do {} situps!", expensive_closure(intensity));
+              } else {
+                  if random_number == 3 {
+                      println!("Take a break today! Remember to stay hydrated!");
+                  } else {
+                      println!(
+                          "Today, run for {} minutes!",
+                          expensive_closure(intensity)
+                      );
+                  }
+              }
+          }
+          
+          fn main() {
+              let simulated_user_specified_value = 10;
+              let simulated_random_number = 7;
+          
+              generate_workout(simulated_user_specified_value, simulated_random_number);
+          }
+          ```
+
+- **Closure Type Inference and Annotation**
+
+    - ```rust
+        fn  add_one_v1   (x: u32) -> u32 { x + 1 }
+        let add_one_v2 = |x: u32| -> u32 { x + 1 };
+        let add_one_v3 = |x|             { x + 1 };
+        let add_one_v4 = |x|               x + 1  ;
+        ```
+
+- **Storing Closeres Using Generic Parameters and the `Fn` Traits**
+
+    - ```rust
+        struct Cacher<T>
+        where
+            T: Fn(u32) -> u32,
+        {
+            calculation: T,
+            value: Option<u32>,
+        }
+        
+        fn main() {}
+        ```
+
+    - The `Cacher` struct has a `calculation` field of the generic type `T`. The trait bounds on `T` specify that it's a closure by using the `Fn` trait.
+
+    - ```rust
+        struct Cacher<T>
+        where
+            T: Fn(u32) -> u32,
+        {
+            calculation: T,
+            value: Option<u32>,
+        }
+        
+        impl<T> Cacher<T>
+        where
+            T: Fn(u32) -> u32,
+        {
+            fn new(calculation: T) -> Cacher<T> {
+                Cacher {
+                    calculation,
+                    value: None,
+                }
+            }
+        
+            fn value(&mut self, arg: u32) -> u32 {
+                match self.value {
+                    Some(v) => v,
+                    None => {
+                        let v = (self.calculation)(arg);
+                        self.value = Some(v);
+                        v
+                    }
+                }
+            }
+        }
+        
+        fn main() {}
+        ```
+
+- **Capturing the Enviroment with Closures**
+
+    - There three `Fn` traites as follows:
+
+        - `FnOnce` consumes the variables it captures from its enclosing scope, known as the closure’s *environment*. To consume the captured variables, the closure must take ownership of these variables and move them into the closure when it is defined. The `Once` part of the name represents the fact that the closure **can’t take ownership of the same variables** more than once, so it can be called only once.
+        - `FnMut` can change the environment because it **mutably borrows values**.
+        - `Fn` borrows values from the environment immutably.
+
+    - Use the keyword `move` before the parameter list to force the closure to take ownership of the values it useds in the environment.
+
+        - ```rust
+            fn main() {
+                let x = vec![1, 2, 3];
+            
+                let equal_to_x = move |z| z == x;
+            
+                println!("can't use x here: {:?}", x); // the value of x is moved into cloures equal_to_x
+            
+                let y = vec![1, 2, 3];
+            
+                assert!(equal_to_x(y));
+            }
+            ```
+
+            
+
+### 10.2 Processing a Series of Items with Iterators
+
+-   **The `Interator` Trait and the `next` Method**
+
+    -   ```rust
+        #![allow(unused)]
+        fn main() {
+        pub trait Iterator {
+            type Item;
+        
+            fn next(&mut self) -> Option<Self::Item>;
+        
+            // methods with default implementations elided
+        }
+        }
+        ```
+
+          
+
+ -    **Methods that produce Other Iterators**
+
+       -    ```rust
+            fn main() {
+                let v1: Vec<i32> = vec![1, 2, 3];
+            
+                v1.iter().map(|x| x + 1); // iterator adaptors are lazy, and we need to consume the iterator here.
+            }
+            ```
+
+      - Instead, use method  `collect`,
+
+          - ```rust
+              fn main() {
+                  let v1: Vec<i32> = vec![1, 2, 3];
+              
+                  let v2: Vec<_> = v1.iter().map(|x| x + 1).collect();
+              
+                  assert_eq!(v2, vec![2, 3, 4]);
+              }
+              ```
+
+- **Using Closures that Capture Their Environment**
+
+    - ```rust
+        struct Shoe {
+            size: u32,
+            style: String,
+        }
+        
+        fn shoes_in_my_size(shoes: Vec<Shoe>, shoe_size: u32) -> Vec<Shoe> {
+            shoes.into_iter().filter(|s| s.size == shoe_size).collect()
+        }
+        ```
+
+- **Creating Our Own Iterators with the `Iterator` Trait**
+
+    - ```rust
+        struct Counter {
+            count: u32,
+        }
+        
+        impl Counter {
+            fn new() -> Counter {
+                Counter { count: 0 }
+            }
+        }
+        
+        impl Iterator for Counter {
+            type Item = u32;
+        
+            fn next(&mut self) -> Option<Self::Item> {
+                if self.count < 5 {
+                    self.count += 1;
+                    Some(self.count)
+                } else {
+                    None
+                }
+            }
+        }
+        
+        fn main() {}
+        ```
+
+        
+
+### 10.3 Improving Our I/O Project
+
+ - **Removing a `clone` Using an Iterator**
+
+### 10.4 Comparing Performance: Loops vs. Iterators
+
+-   Iterators is better than Loops, slightlt faster.
+
+
+
+
+
+## 11 Smart Pointers
+
+### 11.1 Using Box to Point to Data on the Heap
+
+-   `Box<T>`,  type that point to Data on the Heap.
+
+-    **Using a `Box<T>` to Store Data on the Heap**
+
+    -   ```rust
+        fn main() {
+            let b = Box::new(5);
+            println!("b = {}", b);
+        }
+        ```
+
+-   **Enabling Recursive Types with Boxes**
+
+    -   Recursive Type: Whose size can't be known at compile time.
+
+-   **More Information About the Cons List**
+
+    -   Using the `List` type to store the list `1, 2, 3` would look like the code
+
+        -   ```rust
+            enum List {
+                Cons(i32, List),
+                Nil,
+            }
+            
+            use crate::List::{Cons, Nil};
+            
+            fn main() {
+                let list = Cons(1, Cons(2, Cons(3, Nil)));
+            }
+            ```
+
+        -   **the code will not compile successfully⚠️**
+
+-   **Computing the Size of a Non-Recursive Type**
+
+    -   In the enums `Message`. Rust will **go through each of the variants** to see which variant **needs the most space**.
+
+        -   ```rust
+            enum Message {
+                Quit,
+                Move { x: i32, y: i32 },
+                Write(String),
+                ChangeColor(i32, i32, i32),
+            }
+            
+            fn main() {}
+            ```
+
+-   **Using `Box<T>` to Get a Recursive Type with a Known Size**
+
+    -   Change the data struct to store data indirectly by storing a pointer to the value instead. Because the size of pointer is always ensured.
+
+    -   So we can chagne the code
+
+        -   ```rust
+            enum List {
+                Cons(i32, Box<List>),
+                Nil,
+            }
+            
+            use crate::List::{Cons, Nil};
+            
+            fn main() {
+                let list = Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil))))));
+            }
+            ```
+
+            
+
+### 11.2 Treating Smart Pointers Like Regular References with the Deref Trait
+
+-   **Implementing the `Deref` trait allows you to customize the behavior of the dereference oprator `*`** 
+
+    -   ```rust
+        fn main() {
+            let x = 5;
+            let y = &x;
+        
+            assert_eq!(5, x);
+            assert_eq!(5, *y);
+        }
+        ```
+
+-   **Using `Box<T>` Like a REference**
+
+    -   ```rust
+        fn main() {
+            let x = 5;
+            let y = Box::new(x);
+        
+            assert_eq!(5, x);
+            assert_eq!(5, *y);
+        }
+        ```
+
+-   **Defining Out Own Smart Pointer**
+
+    -   ```rust
+        struct MyBox<T>(T); // is a tuple struct
+        
+        impl<T> MyBox<T> {
+            fn new(x: T) -> MyBox<T> {
+                MyBox(x)
+            }
+        }
+        
+        fn main() {}
+        ```
+
+-   **Treating a Type Like a Reference by Implementing the `Deref` Trait**
+
+    -   ```rust
+        use std::ops::Deref;
+        
+        impl<T> Deref for MyBox<T> {
+            type Target = T;
+        
+            fn deref(&self) -> &T {
+                &self.0
+            }
+        }
+        
+        struct MyBox<T>(T);
+        
+        impl<T> MyBox<T> {
+            fn new(x: T) -> MyBox<T> {
+                MyBox(x)
+            }
+        }
+        
+        fn main() {
+            let x = 5;
+            let y = MyBox::new(x);
+        
+            assert_eq!(5, x);
+            assert_eq!(5, *y);
+        }
+        ```
+
+### 11.3 Running Code on Cleanup with the Drop Trait
+
+-   **The smart pattern is `Drop`, which letes you customize what happens when a value is about to go out of scope.**	
+
+    -   ```rust
+        struct CustomSmartPointer {
+            data: String,
+        }
+        
+        impl Drop for CustomSmartPointer {
+            fn drop(&mut self) {
+                println!("Dropping CustomSmartPointer with data `{}`!", self.data);
+            }
+        }
+        
+        fn main() {
+            let c = CustomSmartPointer {
+                data: String::from("my stuff"),
+            };
+            let d = CustomSmartPointer {
+                data: String::from("other stuff"),
+            };
+            println!("CustomSmartPointers created.");
+        }
+        ```
+
+-   **Dropping a Value Early with `std::mem::drop`**
+    -   Can not call the `Drop` trait's `drop` manually. Instead, you have to call the `std::mem::drop` function provided by the standard library.
+
+### 11.4 Rc, the Reference Counted Smart Pointer
+
+-   **Using `Rc<T>` to Share Data**
+
+    -   ```rust
+        enum List {
+            Cons(i32, Box<List>),
+            Nil,
+        }
+        
+        use crate::List::{Cons, Nil};
+        
+        fn main() {
+            let a = Cons(5, Box::new(Cons(10, Box::new(Nil))));
+            let b = Cons(3, Box::new(a)); 
+            let c = Cons(4, Box::new(a)); // the ownership of a shifted, compile error
+        }
+        ```
+
+    -   ```rust
+        enum List {
+            Cons(i32, Rc<List>),
+            Nil,
+        }
+        
+        use crate::List::{Cons, Nil};
+        use std::rc::Rc;
+        
+        fn main() {
+            let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
+            let b = Cons(3, Rc::clone(&a));
+            let c = Cons(4, Rc::clone(&a));
+        }
+        ```
+
+    -   Use `Rc::strong_count()` to count the number of reference.
+
+### 11.5 RefCell and the interior Mutability Pattern
+
+-   **Enforcing Borrowing Rules at Runtime with `RefCell<T>`**
+    -   
+
+### 11.6 Reference Cycles Can Leak Memory
+
