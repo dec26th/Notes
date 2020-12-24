@@ -439,7 +439,7 @@ x = "error"; //error!
             let home = IpAddr::V4(127, 0, 0, 1);
         
             let loopback = IpAddr::V6(String::from("::1"));
-        ```
+       ```
 
     -  ```rust
         
@@ -1794,6 +1794,7 @@ x = "error"; //error!
         ```
 
 -   **Dropping a Value Early with `std::mem::drop`**
+    
     -   Can not call the `Drop` trait's `drop` manually. Instead, you have to call the `std::mem::drop` function provided by the standard library.
 
 ### 11.4 Rc, the Reference Counted Smart Pointer
@@ -1833,10 +1834,160 @@ x = "error"; //error!
 
     -   Use `Rc::strong_count()` to count the number of reference.
 
-### 11.5 RefCell and the interior Mutability Pattern
+### 11.5 RefCell and the interior Mutability Pattern(Todo)
 
 -   **Enforcing Borrowing Rules at Runtime with `RefCell<T>`**
     -   
 
-### 11.6 Reference Cycles Can Leak Memory
+### 11.6 Reference Cycles Can Leak Memory(Todo)
+
+
+
+## 12 Fearless Concurrency
+
+### 12.1 Using Threads to Run Code SImultaneously
+
+-   **Creating a New Thread with `spawn`**
+
+    -   ```rust
+        use std::thread;
+        use std::time::Duration;
+        
+        fn main() {
+            thread::spawn(|| {
+                for i in 1..10 {
+                    println!("hi number {} from the spawned thread!", i);
+                    thread::sleep(Duration::from_millis(1));
+                }
+            });
+        
+            for i in 1..5 {
+                println!("hi number {} from the main thread!", i);
+                thread::sleep(Duration::from_millis(1));
+            }
+        }
+        ```
+
+-   **Waiting for All Threads to Finish Using `join` Handles**
+
+    -   ```rust
+        use std::thread;
+        use std::time::Duration;
+        
+        fn main() {
+            let handle = thread::spawn(|| {
+                for i in 1..10 {
+                    println!("hi number {} from the spawned thread!", i);
+                    thread::sleep(Duration::from_millis(1));
+                }
+            });
+        
+            for i in 1..5 {
+                println!("hi number {} from the main thread!", i);
+                thread::sleep(Duration::from_millis(1));
+            }
+        
+            handle.join().unwrap();
+        }
+        ```
+
+         
+
+-   **Using `move` Closures with Threads**
+
+### 12.2 Using Message Passing to Transfer Data Between Threads
+
+-   **A channel in programming has two halves: Transmitter, receiver**
+
+    -   ```rust
+        use std::sync::mpsc;
+        
+        fn main() {
+            let (tx, rx) = mpsc::channel(); // one send and another receive
+          // mpsc stands for multiple producer, single consumer.
+        }
+        ```
+
+    -   ```rust
+        use std::sync::mpsc;
+        use std::thread;
+        
+        fn main() {
+            let (tx, rx) = mpsc::channel();
+        
+            thread::spawn(move || {
+                let val = String::from("hi");
+                tx.send(val).unwrap();
+            });
+        }
+        ```
+
+    -   The `send` method return a `Result<T,E>` type.If there is nowher to send a value, it will return an error, and the `unwrap()`will `panic`
+
+    -   ```rust
+        use std::sync::mpsc;
+        use std::thread;
+        
+        fn main() {
+            let (tx, rx) = mpsc::channel();
+        
+            thread::spawn(move || {
+                let val = String::from("hi");
+                tx.send(val).unwrap();
+            });
+        
+            let received = rx.recv().unwrap();
+            println!("Got: {}", received);
+        }
+        ```
+
+    -   `recv` block until it send.
+
+    -   `try_recv` doesn't block， but still return `Result<T,E>` immediately. an `Ok` value holding a message if one is avaible and an `Err` value if there aren't any messages this time.
+
+-   **Channels and Ownership Transference**
+
+    -   The `send` function takes ownership of its parameter, when the value is moved, the receiver takes ownership of it.
+
+-   **Treat `tx` as an iterator**
+
+    -   ```rust
+        for received in rx { // stopped when the channel is closed
+        	...
+        }
+        ```
+
+-   **Creating Multiple Producers by Cloning the Transmitter**
+
+    -   ```rust
+        let (tx, rx) = mpsc::channel();
+        let tx1 = mpsc::Sender::Clone(&tx);
+        ```
+
+        
+
+### 12.3 Shared-State Concurrency
+
+-   **Using Mutexes to Allow Access to Data from One Thread at a Time**
+
+    -   The API of `Mutex<T>`
+
+        -   ```rust
+            use std::sync::Mutex;
+            
+            fn main() {
+                let m = Mutex::new(5);
+            
+                {
+                    let mut num = m.lock().unwrap();
+                    *num = 6;
+                }
+            
+                println!("m = {:?}", m);
+            }
+            ```
+
+            
+
+### 12.4 Extensible Concurrency with the Sync and Send Traits
 
