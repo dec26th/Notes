@@ -834,7 +834,7 @@
         	ptrdata    uintptr // size of memory prefix holding all pointers
         	hash       uint32
         	tflag      tflag
-        	align      uint8
+        	align      uint8	
         	fieldAlign uint8
         	kind       uint8
         	// function for comparing objects of this type
@@ -1811,7 +1811,7 @@
 
 - go的**select 多个通道同时可读**，会怎么处理
 
-  - 随即响应
+  - 随机响应
 
 - 重复关闭通道会异常吗？
 
@@ -2010,7 +2010,7 @@
 
   - map
 
-    - go中的map**采用拉链法来解决冲突**(在go中采用的是桶+链表的方法)，首先用键值计算hash值，并且膜上桶的长度从而计算出将值放在那个桶，然后再遍历桶中的元素
+    - go中的map**采用拉链法来解决冲突**(在go中采用的是桶+链表的方法)，首先用键值计算hash值，并且模上桶的长度从而计算出将值放在那个桶，然后再遍历桶中的元素
 
     - 数据结构
 
@@ -2028,7 +2028,7 @@
            buckets    unsafe.Pointer // array of 2^B Buckets. may be nil if count==0.
            oldbuckets unsafe.Pointer // previous bucket array of half the size, non-nil only when growing
            nevacuate  uintptr        // progress counter for evacuation (buckets less than this have been evacuated)
-      
+        
            extra *mapextra // optional fields
         }
         ```
@@ -2041,7 +2041,7 @@
 
         - ```go
           // A bucket for a Go map.
-        type bmap struct {
+          type bmap struct {
              // tophash generally contains the top byte of the hash value
              // for each key in this bucket. If tophash[0] < minTopHash,
              // tophash[0] is a bucket evacuation state instead.
@@ -2051,13 +2051,13 @@
              // code a bit more complicated than alternating key/elem/key/elem/... but it allows
            // us to eliminate padding which would be needed for, e.g., map[int64]int8.
              // Followed by an overflow pointer.
-        }
+          }
           ```
 
         - 由于map中的键值类型需要编译时确定，所以实际上的`bmap`的类型如下
 
           - ```go
-        type bmap struct {
+          type bmap struct {
                 topbits  [8]uint8
             		keys     [8]keytype
                 values   [8]valuetype
@@ -2185,29 +2185,24 @@
     
       - ```go
         var total struct {
-    	sync.Mutex
+    	  sync.Mutex
           value int
-    }
-        
-        ```
-    
-    func worker(wg *sync.WaitGroup) {
-          defer wg.done()
-        for i :=0 ; i <= 100; i++ {
-            total.Lock()  //待实验
-          ...
-          }
+        }
+        func worker(wg *sync.WaitGroup) {
+              defer wg.done()
+            for i :=0 ; i <= 100; i++ {
+                total.Lock()  //待实验
+              ...
+              }
         }
         ```
-    
-    ​    
     
     - 不同的goroutine并不保证顺序一致性的内存模型
     
       - 即对于一个goroutine，它内部的执行可以看作是有顺序的，但是对于另一个goroutine，他认为这个gotoutine的顺序是不一定的，甚至不可感知（可能始终在寄存器当中）。
-
   
-
+  
+  
 - false sharing
   - 一个cache line 共有64字节，可能会有多个进程对其进行操作，这会导致cache line进行频繁的写锁，导致性能急剧下降。
   - 通过向缓存行填充，占满整个cache line 64字节，保证对于一个cache line只有他进行写操作。
@@ -2283,7 +2278,6 @@
     | 和nil比较 | true               | false                  |
 
   
-  
 
 
 
@@ -2320,5 +2314,58 @@
 
 ---
 
-- **GO 匿名结构内嵌结构体**
-  - 
+- **锁的使用技巧**
+
+  - 减少持有时间
+
+    - 只在需要用锁的时候使用锁。
+
+    - ```go
+      var mu sync.Mutex
+      var Users = map[string]string {
+      	"user": "password",
+      }
+      
+      ...
+      
+      # maybe bad
+      mu.Lock()
+      defer mu.Unlock()
+      realPwd, exist := Users[name]
+      return ...  # no need to be locked
+      
+      ...
+      
+      var readPwd string
+      var exist string 
+      func () {
+        mu.Lock()
+        defer mu.UnLock()
+        realPwd, exist = Users[name]
+      }
+      return ...
+      
+      ```
+
+  - 优化锁的粒度
+
+    - 不要大范围的加锁
+
+  - 读写分离
+
+    - 读写锁
+
+  - 使用原子操作
+
+    - 不触发调度，不阻塞执行流
+
+  ---
+
+  - **并发安全问题**
+    - 实现一个并发安全的有序链表
+      - Data Race
+        - 读写锁可以解决。但是并发写操作只有一个CPU，没有并行化。
+
+  
+
+  

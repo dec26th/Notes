@@ -35,7 +35,7 @@ x = "error"; //error!
 ```
 
 - the difference between variables in rust and the consts.
-    - const is always immutable, but variables in rust can be se mutable.
+    - const is always immutable, but variables in rust can be set mutable.
     - the type of const must be annotated while variables can easily declared by the keyword `let`
     - const can be only set as a constant expression, not the result of a function call or any other value that could be computed at runtime.
 
