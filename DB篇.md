@@ -116,7 +116,7 @@ categories: [学习，Mysql]
       |  串行化  |      避免      |      避免      | 避免 |    避免    | 避免 |
       | 可重复读 |      避免      |      避免      | 避免 |    避免    | 允许 |
       | 读已提交 |      避免      |      允许      | 避免 |    允许    | 允许 |
-      | 读为提交 |      避免      |      允许      | 允许 |    允许    | 允许 |
+      | 读未提交 |      避免      |      允许      | 允许 |    允许    | 允许 |
 
   
 
@@ -341,16 +341,16 @@ categories: [学习，Mysql]
         (integer) 1
         sadd runoob rabitmq
         (integer) 1
-      sadd runoob rabitmq
+        sadd runoob rabitmq
         (integer) 0
-      smembers runoob
+        smembers runoob
         
         ```
 
        1) "redis"
        2) "rabitmq"
      3) "mongodb"
-      
+    
     - 哈希表实现，元素不重复
       
     - 添加，删除，查找的时间复杂度都是O(1)

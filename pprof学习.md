@@ -6,13 +6,19 @@
 - 可以在网页上打开`http://localhost:9876/debug/pprof`
 - 可以输入`http://localhost:9876/debug/pprof/profile`来下载profile文件，然后通过命令`go tool pprof test profile`来打开文件
   - top指令 可以获取占用前10 的数据（cpu）
-    - flat、flat% 表示函数在 CPU 上运行的时间以及百分比
-    - sum% 表示当前函数累加使用 CPU 的比例
-    - cum、cum%表示该函数以及子函数运行所占用的时间和比例，应该大于等于前两列的值
+    
+    ![top](./pic/top.png)
+    
+    - **flat、flat%** 表示函数在 CPU 上**运行的时间**以及**百分比**
+    - **sum%** top命令当中**排在它上面的函数以及本函数的flat%之和**
+    - **cum、cum%**表示该**函数在调用堆栈时采用的时间，包括等待子函数的返回的时间**，因此cum >= flat
+    
   - Web 可以在网页上看到图形化的界面
+  
+  - List 函数源码行粒度进行分析
 - 或者使用`go-torch`工具，可以看到火焰图。直接使用`go tool pprof http=: 127.0.0.1:8081 ~/pprof/pprof......` 可以在网页上看到火焰图
   - 火焰图中调用顺序从下往上
-  - 图形越长说明占用CPU时间越长
+  - 图形**越长说明占用CPU时间越长**
   - 每一个方块代表一个函数
   - 上面一层表示当前层调用的函数
 - 可以使用`/debug/pprof/heap`来获得程序的内存快照
