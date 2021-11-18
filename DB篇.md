@@ -812,11 +812,29 @@ categories: [学习，Mysql]
 
 ---
 
-- **undo log && redo log**
-  - redo log
-    - 当进行数据修改时还会记录undo log，undo log用于数据的撤回操作，它**记录了修改的反向操作**，比如，插入对应删除，修改对应修改为原来的数据，通过undo log**可以实现事务回滚**，并且可以**根据undo log回溯到某个特定的版本的数据**，实现MVCC
-  - undo log
+- **undo log && redo log&&bin log**
+  
+  - redo log（InnoDB引擎实现，确保事务的持久性）保存物理日志，某个数据页上做修改，日志大小有限制
+  
+    ![redo_log](./pic/redo_log.png)
+  
+    - 当有记录需要更新的时候，innoDB会有闲将记录写入到redo log当中，并更新内存，这个时候就算完成。在合适的时候，innoDB会将redo log buffer中的记录写入到磁盘当中。
+    - 数据对哪些数据页进行修改
+      - redo log buffer | redo log file
+      - 每一条SQL语句，都写入redo log buffer，后续某个节点再将所有的操作再写入redo log file。先写缓存后写磁盘（Write-Ahead logging）。
+      - 通过环形Buffer来存储日志
+      - LSN（Log Sequence Number）实际上就是InnoDB使用的一个版本标记的计数，它是一个单调递增的值。数据页和redo log都有各自的LSN。我们可以根据数据页中的LSN值和redo log中LSN的值判断需要恢复的redo log的位置和大小。
+  
+  - undo log（确保事务的原子性）
+  
     - **记录了数据操作**在**物理层面**的修改，mysql中使用了大量缓存，**修改操作时会直接修改内存**，而不是立刻修改磁盘，事务进行中时会**不断的产生redo log**，在事务**提交时进行一次flush操作**，保存到磁盘中。当数据库或主机失效重启时，会根据redo log进行数据的恢复，如果redo log中有事务提交，则进行事务提交修改数据。
+  
+  - bin log(Server 层任何引擎都适用， 只保存逻辑日志），超过文件大小会再写一个文件。
+  
+    - 记录mysql的写入行操作
+    - 主从复制
+    - 数据恢复
+    - 只有在事务提交的时候才会记录binlog，通过0-N来控制binlog写入磁盘。每*次事务提交写入磁盘。0不做强制判断。
 
 ---
 
