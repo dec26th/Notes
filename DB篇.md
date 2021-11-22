@@ -818,12 +818,19 @@ categories: [学习，Mysql]
   
     ![redo_log](./pic/redo_log.png)
   
-    - 当有记录需要更新的时候，innoDB会有闲将记录写入到redo log当中，并更新内存，这个时候就算完成。在合适的时候，innoDB会将redo log buffer中的记录写入到磁盘当中。
+    - 当有记录需要更新的时候，innoDB会有先将记录写入到redo log当中，并更新内存，这个时候就算完成。在合适的时候，innoDB会将redo log buffer中的记录写入到磁盘当中。
     - 数据对哪些数据页进行修改
       - redo log buffer | redo log file
-      - 每一条SQL语句，都写入redo log buffer，后续某个节点再将所有的操作再写入redo log file。先写缓存后写磁盘（Write-Ahead logging）。
+      - 每一条SQL语句，都写入redo log buffer，后续某个节点再**将所有的操作再写入redo log file**。先写缓存后写磁盘（Write-Ahead logging）。因为redo log file都是顺序写入的，比直接将db的修改持久化到db的磁盘中更加的高效（无序）。
       - 通过环形Buffer来存储日志
       - LSN（Log Sequence Number）实际上就是InnoDB使用的一个版本标记的计数，它是一个单调递增的值。数据页和redo log都有各自的LSN。我们可以根据数据页中的LSN值和redo log中LSN的值判断需要恢复的redo log的位置和大小。
+    - redo log block | redo log buffer
+      - 一条条的redo log写入block，buffer里面保存着一个个的block
+      - redo log block写入磁盘的时机
+        - redo log buffer的日志占了总容量的一半，一个redo log buffer默认是16M，一半的话也就是8M，就刷盘
+        - 当一个事务提交的时候，redo log所在的redo log block就会刷盘
+        - 后台线程每隔一秒将redo log buffer里面的redo log block刷入磁盘
+        - MySQL关闭的时候，redo log block刷盘
   
   - undo log（确保事务的原子性）
   
