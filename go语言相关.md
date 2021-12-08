@@ -373,7 +373,7 @@
       - _Psyscall
         - 表示当前的P没有执行任何的用户code，他对正在进行系统调用的M有着亲和力，但是可能并不被该m拥有，并且很有可能被其他的M窃取。从_Psyscall状态中转移出来，必须需要有CAS来进行。不管是steal还是retake一个P。但是可能会出现ABA问题，因为当P被已经执行完系统调用的M所回收的时候，他有可能已经被其他的M所使用过了。
       - _Pgcstop
-        - 当前的**P因为GC所中止**，并且**被STW的M所拥有**。STW的M依旧使用着该P，尽管当前的p处于_Pgcstop。p的状态从Prunning到Pgctop的转变，M会释放他的P并且park。P会保存当前的运行队列。当StarkTheWorld时，P上的调度这会重新的调度这个P。
+        - 当前的**P因为GC所中止**，并且**被STW的M所拥有**。STW的M依旧使用着该P，尽管当前的p处于_Pgcstop。p的状态从Prunning到Pgctop的转变，M会释放他的P并且park。P会保存当前的运行队列。当StartTheWorld时，P上的调度这会重新的调度这个P。
       - _Pdead
         - P不再使用(GOMAXPROCS 缩容)， 我们会重用P如果GOMAXPROCS扩容，一个死掉的P很大概率上释放他的资源，尽管只占用了些许资源。
 
@@ -381,7 +381,7 @@
 
     - P会在当前队列为空的时候，去偷取别的P中的队列的任务，若偷不到则去全局的任务队列当中选取，若还是没有则控制M进行休眠
 
-    - P模型是GM模型所遇到问题所增加的一个中间层调度者，因为在GM模型当中，当一个G发生系统调用时，会阻塞其他的goroutine的调度，在有了p之后，可以即使的解绑P和M，在当前M上等待的其余goroutine转移到另一个M，使得其可以执行
+    - P模型是GM模型所遇到问题所增加的一个中间层调度者，因为在GM模型当中，当一个G发生系统调用时，会阻塞其他的goroutine的调度，在有了p之后，可以及时的解绑P和M，在当前M上等待的其余goroutine转移到另一个M，使得其可以执行
 
     - P的状态转移图
 
@@ -962,7 +962,7 @@
 
   - 向chan发送数据 channel <-  `chansend()`
 
-    - 编译器在遇到语句 chan <- i时，会讲他解析成OSEDN并且将函数转换成了runtime.chansend1
+    - 编译器在遇到语句 chan <- i时，会讲他解析成OSEND并且将函数转换成了runtime.chansend1
 
     - 而`chansend1`内部仅仅调用了`chansend()`函数，**传入了chan以及需要发送的参数**，并且将block参数设置为true，表明这次是一个阻塞的操作。
 
@@ -2057,7 +2057,7 @@
         - 由于map中的键值类型需要编译时确定，所以实际上的`bmap`的类型如下
 
           - ```go
-          type bmap struct {
+            type bmap struct {
                 topbits  [8]uint8
             		keys     [8]keytype
                 values   [8]valuetype

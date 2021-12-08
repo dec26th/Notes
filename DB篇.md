@@ -905,3 +905,7 @@ categories: [学习，Mysql]
   - 从:	io线程 在使用start slave之后，负责从master上拉取binlog内容，放进自己的relay log中
   - 从： sql执行线程，执行relay log
 
+---
+
+- **Elastic Search**
+
